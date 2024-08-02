@@ -1,0 +1,32 @@
+image: node:20.11.1
+
+stages:
+  - install
+  - test
+  - deploy
+
+cache:
+  paths:
+    - node_modules/
+
+before_script:
+  - npm install
+
+install:
+  stage: install
+  script:
+    - npm install
+
+deploy:
+  stage: deploy
+  script:
+    - apt-get update -y
+    - apt-get install -y rsync openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H 15.206.235.9 >> ~/.ssh/known_hosts
+    - rsync -avz --delete . ubuntu@15.206.235.9:/var/app/qr_backend_indicold
+    - ssh ubuntu@15.206.235.9 '/home/ubuntu/.nvm/versions/node/v20.11.1/bin/pm2 restart qrcode_backend'
+  only:
+    - dev_branch
