@@ -121,7 +121,6 @@ app.post('/register-firm', async (req, res) => {
     const { firm_name, email, phone, pan, status, created_by } = req.body;
 
     try {
-        // Check if the firm with the given email already exists
         const existingFirm = await Firm.findOne({ where: { email } });
         if (existingFirm) {
             return res.status(400).json({
@@ -131,7 +130,6 @@ app.post('/register-firm', async (req, res) => {
             });
         }
 
-        // Create a new firm record
         const newFirm = await Firm.create({ firm_name, email, phone, pan, status, created_by });
         return res.status(201).json({
             status: 'success',
@@ -139,7 +137,7 @@ app.post('/register-firm', async (req, res) => {
             data: newFirm
         });
     } catch (error) {
-        console.error(error); // Log the error for debugging
+        console.error(error); 
         return res.status(500).json({
             status: 'error',
             message: 'Internal server error',
