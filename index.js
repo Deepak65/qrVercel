@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const Value = require('./modals/index');
-const Firm = require('./modals/firm')
+// const Firm = require('./modals/firm')
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: '*' }));
@@ -117,34 +117,34 @@ app.get('/redirect/:key', async (req, res) => {
     res.status(500).send('Internal server error');
   }
 });
-app.post('/register-firm', async (req, res) => {
-    const { firm_name, email, phone, pan, status, created_by } = req.body;
+// app.post('/register-firm', async (req, res) => {
+//     const { firm_name, email, phone, pan, status, created_by } = req.body;
 
-    try {
-        const existingFirm = await Firm.findOne({ where: { email } });
-        if (existingFirm) {
-            return res.status(400).json({
-                status: 'error',
-                message: 'Firm with this email already exists',
-                data: null
-            });
-        }
+//     try {
+//         const existingFirm = await Firm.findOne({ where: { email } });
+//         if (existingFirm) {
+//             return res.status(400).json({
+//                 status: 'error',
+//                 message: 'Firm with this email already exists',
+//                 data: null
+//             });
+//         }
 
-        const newFirm = await Firm.create({ firm_name, email, phone, pan, status, created_by });
-        return res.status(201).json({
-            status: 'success',
-            message: 'Firm successfully registered',
-            data: newFirm
-        });
-    } catch (error) {
-        console.error(error); 
-        return res.status(500).json({
-            status: 'error',
-            message: 'Internal server error',
-            data: null
-        });
-    }
-});
+//         const newFirm = await Firm.create({ firm_name, email, phone, pan, status, created_by });
+//         return res.status(201).json({
+//             status: 'success',
+//             message: 'Firm successfully registered',
+//             data: newFirm
+//         });
+//     } catch (error) {
+//         console.error(error); 
+//         return res.status(500).json({
+//             status: 'error',
+//             message: 'Internal server error',
+//             data: null
+//         });
+//     }
+// });
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
