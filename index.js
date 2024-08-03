@@ -145,7 +145,18 @@ app.post('/register-firm', async (req, res) => {
         });
     }
 });
-
+app.get('/getAllFirm', async (req, res) => {
+    try {
+      const values = await Firm.findAll();
+      res.json({
+        status: 'true',
+        message: 'Firm Found',
+        data: values
+    });
+    } catch (error) {
+      res.status(500).send('Internal server error');
+    }
+  });
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
