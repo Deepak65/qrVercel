@@ -100,9 +100,9 @@ app.get('/redirect/:key', async (req, res) => {
           <head>
             <title>Redirecting...</title>
             <script type="text/javascript">
-              setTimeout(function() {
+           
                 window.location.href = '${value.value}';
-              }, 1000); // 1 second delay for demonstration
+            
             </script>
           </head>
           <body>
