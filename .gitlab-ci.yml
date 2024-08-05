@@ -26,7 +26,8 @@ deploy:
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
     - ssh-keyscan -H 15.206.235.9 >> ~/.ssh/known_hosts
-    - rsync -avz --delete . ubuntu@15.206.235.9:/var/app/qr_backend_indicold
+    - rsync -avz --delete --exclude '.env' . ubuntu@15.206.235.9:/var/app/qr_backend_indicold
+    - ssh ubuntu@15.206.235.9 'chown -R ubuntu:ubuntu /var/app/qr_backend_indicold && chmod -R 755 /var/app/qr_backend_indicold'
     - ssh ubuntu@15.206.235.9 '/home/ubuntu/.nvm/versions/node/v20.11.1/bin/pm2 restart qrcode_backend'
   only:
-    - dev_branch
+    - dev
