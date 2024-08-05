@@ -3,6 +3,9 @@ const express = require('express');
 const cors = require('cors');
 const Value = require('./modals/index');
 const Firm = require('./modals/firm')
+const User = require('./modals/user')
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: '*' }));
@@ -157,6 +160,57 @@ app.get('/getAllFirm', async (req, res) => {
       res.status(500).send('Internal server error');
     }
   });
+  // Assuming you have already required necessary modules and initialized app
+
+  function hashPasswordMD5(password) {
+    return crypto.createHash('md5').update(password).digest('hex');
+  }
+// Endpoint for user login
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+  
+    try {
+      // Find the user by email
+      const user = await User.findOne({ where: { email } });
+  
+      if (!user) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'User not found',
+          data: null,
+        });
+      }
+  
+      // Hash the provided password and compare with stored hash
+      const hashedPassword = hashPasswordMD5(password);
+  
+      if (hashedPassword !== user.password) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Invalid password',
+          data: null,
+        });
+      }
+  
+      // Return user details
+      return res.status(200).json({
+        status: 'success',
+        message: 'Login successful',
+        data: {
+          email: user.email,
+          name: user.name, // Include other user details as needed
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        status: 'error',
+        message: 'Internal server error',
+        data: null,
+      });
+    }
+  });
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
