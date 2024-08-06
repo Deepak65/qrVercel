@@ -6,6 +6,7 @@ const Firm = require('./modals/firm')
 const User = require('./modals/user')
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
+const { Sequelize, Op } = require('sequelize');
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: '*' }));
@@ -210,7 +211,53 @@ app.post('/login', async (req, res) => {
       });
     }
   });
-
+  app.get('/getFirmAndQRCode/:firm_name', async (req, res) => {
+    const firmName = req.params.firm_name;
+  
+    try {
+      // Find the firm by name with case sensitivity
+      const firm = await Firm.findOne({ 
+        where: Sequelize.where(
+          Sequelize.fn('BINARY', Sequelize.col('firm_name')), 
+          firmName
+        )
+      });
+  
+      if (!firm) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'Firm not found',
+          data: null,
+        });
+      }
+  
+      // Find QR code associated with the firm
+      const qrCode = await Value.findOne({ 
+        where: { 
+          key: firmName 
+        } 
+      });
+  
+      // Prepare the response
+      const response = {
+        firm: firm,
+        qr_code: qrCode ? qrCode.value : null // Assuming `value` is the column in qr_codes table
+      };
+  
+      return res.status(200).json({
+        status: 'success',
+        message: 'Data retrieved successfully',
+        data: response,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        status: 'error',
+        message: 'Internal server error',
+        data: null,
+      });
+    }
+  });
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
