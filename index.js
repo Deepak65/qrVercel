@@ -21,7 +21,7 @@ app.get('/', async (req, res) => {
   try {
     let value = await Value.findOne({ where: { key: initialKey } });
     if (!value) {
-      value = await Value.create({ key: initialKey, value: initialValue });
+      // value = await Value.create({ key: initialKey, value: initialValue });
       res.send(`Hello, the app is running and initial value is set to ${initialValue}`);
     } else {
       res.send(`${value.value}`);
