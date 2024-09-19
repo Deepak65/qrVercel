@@ -174,7 +174,12 @@ app.get('/count/:key', async (req, res) => {
       order: [[Sequelize.fn('DATE_FORMAT', Sequelize.col('date'), '%Y-%m-%d %H:%i:%s'), 'ASC']],
     });
 
-    res.json(counts);
+    // res.json(counts);
+    return res.status(200).json({
+      status: 'success',
+      message: 'Data retrieved successfully',
+      data: counts,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'An error occurred while counting the entries.' });
