@@ -4,6 +4,7 @@ const cors = require('cors');
 const Value = require('./modals/index');
 const Firm = require('./modals/firm')
 const User = require('./modals/user')
+const ScanLog = require('./modals/logs')
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const { Sequelize, Op } = require('sequelize');
@@ -96,9 +97,15 @@ app.get('/values', async (req, res) => {
 
 app.get('/redirect/:key', async (req, res) => {
   const key = req.params.key;
+  console.log(key,"key")
   try {
     const value = await Value.findOne({ where: { key } });
     if (value) {
+      await ScanLog.create({
+        key: key,
+        date: new Date(), // Record the exact time of the scan
+      });
+      console.log(value,"value")
       res.send(`
         <html>
           <head>
@@ -119,6 +126,58 @@ app.get('/redirect/:key', async (req, res) => {
     }
   } catch (error) {
     res.status(500).send('Internal server error');
+  }
+});
+// app.get('/count/:key', async (req, res) => {
+//   const { key } = req.params;
+
+//   // Validate query parameter
+//   if (!key) {
+//     return res.status(400).json({ error: 'Key is required.' });
+//   }
+
+//   try {
+//     // Query to count entries grouped by date
+//     const counts = await ScanLog.findAll({
+//       attributes: [
+//         [Sequelize.fn('DATE', Sequelize.col('date')), 'date'],
+//         [Sequelize.fn('COUNT', Sequelize.col('id')), 'count'],
+//       ],
+//       where: { key },
+//       group: [Sequelize.fn('DATE', Sequelize.col('date'))],
+//       order: [[Sequelize.fn('DATE', Sequelize.col('date')), 'ASC']],
+//     });
+
+//     res.json(counts);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'An error occurred while counting the entries.' });
+//   }
+// });
+app.get('/count/:key', async (req, res) => {
+  const { key } = req.params;
+
+  // Validate query parameter
+  if (!key) {
+    return res.status(400).json({ error: 'Key is required.' });
+  }
+
+  try {
+    // Query to count entries grouped by date and time
+    const counts = await ScanLog.findAll({
+      attributes: [
+        [Sequelize.fn('DATE_FORMAT', Sequelize.col('date'), '%Y-%m-%d %H:%i:%s'), 'date'], // Format date with time
+        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count'],
+      ],
+      where: { key },
+      group: [Sequelize.fn('DATE_FORMAT', Sequelize.col('date'), '%Y-%m-%d %H:%i:%s')],
+      order: [[Sequelize.fn('DATE_FORMAT', Sequelize.col('date'), '%Y-%m-%d %H:%i:%s'), 'ASC']],
+    });
+
+    res.json(counts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred while counting the entries.' });
   }
 });
 app.post('/register-firm', async (req, res) => {
