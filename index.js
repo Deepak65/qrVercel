@@ -156,10 +156,22 @@ app.get('/redirect/:key', async (req, res) => {
 // });
 app.get('/count/:key', async (req, res) => {
   const { key } = req.params;
+  const { date } = req.query; // Get the date query parameter
 
   // Validate query parameter
   if (!key) {
     return res.status(400).json({ error: 'Key is required.' });
+  }
+
+  // Initialize the where clause
+  const whereClause = { key };
+
+  // If a date is provided, add it to the where clause
+  if (date) {
+    whereClause.date = {
+      [Sequelize.Op.gte]: new Date(date), // Start of the date
+      [Sequelize.Op.lt]: new Date(new Date(date).setDate(new Date(date).getDate() + 1)), // End of the date
+    };
   }
 
   try {
@@ -169,12 +181,11 @@ app.get('/count/:key', async (req, res) => {
         [Sequelize.fn('DATE_FORMAT', Sequelize.col('date'), '%Y-%m-%d %H:%i:%s'), 'date'], // Format date with time
         [Sequelize.fn('COUNT', Sequelize.col('id')), 'count'],
       ],
-      where: { key },
+      where: whereClause,
       group: [Sequelize.fn('DATE_FORMAT', Sequelize.col('date'), '%Y-%m-%d %H:%i:%s')],
       order: [[Sequelize.fn('DATE_FORMAT', Sequelize.col('date'), '%Y-%m-%d %H:%i:%s'), 'ASC']],
     });
 
-    // res.json(counts);
     return res.status(200).json({
       status: 'success',
       message: 'Data retrieved successfully',
@@ -185,6 +196,7 @@ app.get('/count/:key', async (req, res) => {
     res.status(500).json({ error: 'An error occurred while counting the entries.' });
   }
 });
+
 app.post('/register-firm', async (req, res) => {
     const { firm_name, email, phone, pan, status, created_by } = req.body;
 
